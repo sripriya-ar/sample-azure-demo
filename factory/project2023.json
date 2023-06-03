@@ -1,0 +1,9 @@
+{
+	"name": "project2023",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "3a74a812-d958-4590-ba89-34bdb26bcf2a",
+		"tenantId": "403b1d33-a765-479f-82b1-75bd3a4a7a33"
+	}
+}

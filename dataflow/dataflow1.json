@@ -1,0 +1,75 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "seller",
+						"type": "DatasetReference"
+					},
+					"name": "seller"
+				},
+				{
+					"dataset": {
+						"referenceName": "geolocation",
+						"type": "DatasetReference"
+					},
+					"name": "geolocation"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "finaloutput",
+						"type": "DatasetReference"
+					},
+					"name": "output",
+					"rejectedDataLinkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "join1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          seller_id as string,",
+				"          seller_zip_code_prefix as string,",
+				"          seller_city as string,",
+				"          seller_state as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> seller",
+				"source(output(",
+				"          geolocation_zip_code_prefix as string,",
+				"          geolocation_lat as string,",
+				"          geolocation_lng as string,",
+				"          geolocation_city as string,",
+				"          geolocation_state as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> geolocation",
+				"seller, geolocation join(seller_zip_code_prefix == geolocation_zip_code_prefix,",
+				"     joinType:'outer',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> join1",
+				"join1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     partitionFileNames:['finaloutput'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> output"
+			]
+		}
+	}
+}
